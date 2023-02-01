@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  web:
+    build: ./
+    environment:
+      - APACHE_RUN_USER=#1000
+      - COMPOSER_MEMORY_LIMIT=-1
+    volumes:
+      - ./:/var/www/html                    # прокидывания содержимого всех файлов проекта в папку /var/www/html контейнера
+    ports:
+      - 8114:80                             # 8095 - порт по к-рому доступен сайт вне контейнера (т.е. http://localhost:8095 )
+    working_dir: /var/www/html              # путь к файлам сайта внутри контейнера
+
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root             # пароль для базы данных (логин по умолчанию root)
+      MYSQL_DATABASE: laravel_miniERP       # имя базы данных
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - 9114:80                             # 9095 - порт по к-рому доступен phpMyAdmin вне контейнера (т.е. http://localhost:9095 )
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - UPLOAD_LIMIT=64M
+    depends_on:
+      - db
