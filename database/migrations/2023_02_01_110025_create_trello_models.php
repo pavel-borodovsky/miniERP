@@ -24,15 +24,15 @@ return new class extends Migration
             $table->string('name');
             $table->string('idBoard');
             $table->foreign('idBoard')->references('idBoard')->on('boards');
-            $table->unsignedFloat('pos');
+            $table->unsignedInteger('pos');
             $table->timestamps();
         });
 
         Schema::create('list_cards', function (Blueprint $table) {
             $table->string('idCard')->primary();
-            $table->string('name');
-            $table->unsignedFloat('pos');
-            $table->dateTime('due');
+            $table->text('name');
+            $table->unsignedInteger('pos');
+            $table->dateTime('due')->nullable();
             $table->string('idList');
             $table->foreign('idList')->references('idList')->on('board_lists');
             $table->string('urlSource');

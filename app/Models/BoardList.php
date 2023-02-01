@@ -12,4 +12,5 @@ class BoardList extends Model
     protected $primaryKey = 'idList';
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $fillable = ['idList', 'name', 'pos', 'idBoard'];
 }

@@ -12,4 +12,5 @@ class ListCard extends Model
     protected $primaryKey = 'idCard';
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $fillable = ['idCard', 'name', 'idList', 'pos', 'due', 'urlSource'];
 }

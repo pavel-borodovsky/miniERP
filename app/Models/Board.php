@@ -12,4 +12,5 @@ class Board extends Model
     protected $primaryKey = 'idBoard';
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $fillable = ['idBoard', 'name'];
 }
