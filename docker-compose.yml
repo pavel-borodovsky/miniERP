@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/var/www/html                    # прокидывания содержимого всех файлов проекта в папку /var/www/html контейнера
     ports:
-      - 8114:80                             # 8095 - порт по к-рому доступен сайт вне контейнера (т.е. http://localhost:8095 )
+      - 8115:80                             # 8095 - порт по к-рому доступен сайт вне контейнера (т.е. http://localhost:8095 )
     working_dir: /var/www/html              # путь к файлам сайта внутри контейнера
 
   db:
@@ -23,7 +23,7 @@ services:
     links:
       - db:db
     ports:
-      - 9114:80                             # 9095 - порт по к-рому доступен phpMyAdmin вне контейнера (т.е. http://localhost:9095 )
+      - 9115:80                             # 9095 - порт по к-рому доступен phpMyAdmin вне контейнера (т.е. http://localhost:9095 )
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - UPLOAD_LIMIT=64M
