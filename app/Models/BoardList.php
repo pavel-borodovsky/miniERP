@@ -13,4 +13,12 @@ class BoardList extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = ['idList', 'name', 'pos', 'idBoard'];
+
+    public function listCards() {
+        return $this->hasMany(ListCard::class);
+    }
+
+    public function board() {
+        return $this->belongsTo(Board::class);
+    }
 }
