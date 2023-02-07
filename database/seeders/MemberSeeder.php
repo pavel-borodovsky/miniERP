@@ -17,7 +17,9 @@ class MemberSeeder extends Seeder
     {
         if(Member::count() == 0) {
             Member::create([
+                'id' => '5bbb6e30e3f98b2858a33661',
                 'user_id' => 1,
+                'user_name' => 'test_tale',
                 'rate' => 8
             ]);
         }

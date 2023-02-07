@@ -11,9 +11,9 @@ class Member extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $fillable = ['user_id', 'rate'];
+    protected $fillable = ['id', 'user_name', 'user_id', 'rate'];
 
     public function listCards() {
-        return $this->belongsToMany(ListCard::class)->using(MemberCard::class);
+        return $this->belongsToMany(ListCard::class, 'members_cards')->using(MemberCard::class)->withPivot('id', 'est_hour');
     }
 }
