@@ -5,8 +5,16 @@ namespace App\Console\Commands;
 use App\Models\Board;
 use App\Models\BoardList;
 use App\Models\ListCard;
+use App\Models\Member;
+use App\Models\MemberCard;
+use App\Models\MemberCardTime;
+use App\Models\User;
 use App\Services\TrelloApi;
+use Faker\Generator;
 use Illuminate\Console\Command;
+use Illuminate\Container\Container;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class ConnectTrello extends Command
 {
@@ -15,7 +23,7 @@ class ConnectTrello extends Command
      *
      * @var string
      */
-    protected $signature = 'connect:trello';
+    protected $signature = 'synch:trello';
 
     /**
      * The console command description.
@@ -23,8 +31,9 @@ class ConnectTrello extends Command
      * @var string
      */
     protected $description = 'Getting data via API Trello and updating model\'s data';
-    //todo убрать, когда будут реализованы мемберы
+    //используется в кач-ве букера
     protected $memberId = 'test_tale';
+
     /**
      * Execute the console command.
      *
@@ -42,11 +51,10 @@ class ConnectTrello extends Command
                 'idBoard' => $board['id'],
                 'name' => $board['name']
             ];
-            if(!$existBoard) {
+            if (!$existBoard) {
                 Board::create($data);
                 $createdBoards++;
-            }
-            else {
+            } else {
                 $existBoard->update($data);
                 $updatedBoards++;
             }
@@ -60,17 +68,17 @@ class ConnectTrello extends Command
                     'pos' => $list['pos'],
                     'idBoard' => $list['idBoard']
                 ];
-                if(!$existList) {
+                if (!$existList) {
                     BoardList::create($data);
                     $createdLists++;
-                }
-                else {
+                } else {
                     $existList->update($data);
                     $updatedLists++;
                 }
             }
             $cards = $api->getCardsByBoard($board['id']);
             foreach ($cards as $card) {
+                //creating or adding card
                 $existCard = ListCard::find($card['id']);
                 $data = [
                     'idCard' => $card['id'],
@@ -80,18 +88,73 @@ class ConnectTrello extends Command
                     'idList' => $card['idList'],
                     'urlSource' => $card['shortUrl'] //or $card['url']
                 ];
-                if(!$existCard) {
+                if (!$existCard) {
                     ListCard::create($data);
                     $createdCards++;
-                }
-                else {
+                } else {
                     $existCard->update($data);
                     $updatedCards++;
                 }
-            }
 
+                //check members for card
+                $tempMember = null;
+                $members = $api->getMembersOfCard($card['id']);
+                foreach ($members as $member) {
+                    $tempMember = Member::find($member['id']);
+                    if (!$tempMember) {
+                        //adding user with faker's help
+                        $faker = Container::getInstance()->make(Generator::class);
+                        $user = User::create([
+                            'name' => $member['username'],
+                            'email' => $faker->unique()->safeEmail(),
+                            'password' => $faker->password(),
+                            'isActive' => 0
+                        ]);
+
+                        $tempMember = Member::create([
+                            'id' => $member['id'],
+                            'user_name' => $member['username'],
+                            'user_id' => $user->id
+                        ]);
+                    }
+                    //check existing that relation
+                    if (!$tempMember->listCards->find($card['id'])) {
+                        $tempMember->listCards()->attach($card['id']);
+                        //storing old value member without relation, need to rewrite
+                        $tempMember = Member::find($member['id']);
+                    }
+                }
+
+                $comments = $api->getCommentsByCard($card['id']);
+
+                //no reason to check comments without members linked with card
+                if($tempMember != null) {
+                    foreach ($comments as $comment) {
+                        $tempMember->listCards->find($card['id']);
+                        $text = $comment['data']['text'];
+                        //adding estimate hour into pivot table
+                        if (Str::startsWith($text, 'plus! 0/')) {
+                            $time = $this->getTimeFromComment($comment['data']['text']);
+                            $estHour = $time[1];
+                            $tempMember->listCards()->updateExistingPivot($card['id'], ['est_hour' => $estHour]);
+                        }
+                        if (Str::startsWith($text, 'plus! ')) {
+                            $time = $this->getTimeFromComment($text);
+                            $note = $this->getNoteFromComment($text);
+                            $memberCardId = MemberCard::where(['list_card_idCard' => $card['id'], 'member_id' => $tempMember->id])->first()->id;
+                            if ($time[0] > 0 && MemberCardTime::where(['members_cards_id' => $memberCardId, 'date' => Carbon::parse($comment['date'])->format('Y-m-d H:i:s'), 'spent_time' => (double)$time[0]])->first() == null) {
+                                MemberCardTime::create([
+                                    'spent_time' => (double)$time[0],
+                                    'date' => Carbon::parse($comment['date'])->format('Y-m-d H:i:s'),
+                                    'note' => $note ?? null,
+                                    'members_cards_id' => $tempMember->listCards->find($card['id']) ? $tempMember->listCards->find($card['id'])->pivot->id : ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
         }
-        //todo заменить info на log
         $this->info("Boards has been created: $createdBoards");
         $this->info("Boards has been updated: $updatedBoards");
         $this->info("Lists has been created: $createdLists");
@@ -99,5 +162,18 @@ class ConnectTrello extends Command
         $this->info("Cards has been created: $createdCards");
         $this->info("Cards has been updated: $updatedCards");
         return Command::SUCCESS;
+    }
+
+    public function getTimeFromComment(string $comment)
+    {
+        return explode('/', explode(' ', $comment)[1]);
+    }
+
+    public function getNoteFromComment(string $comment)
+    {
+        $arr = explode(' ', $comment);
+        unset($arr[0]);
+        unset($arr[1]);
+        return implode(' ', $arr);
     }
 }
