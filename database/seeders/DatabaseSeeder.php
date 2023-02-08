@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Invoice;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,6 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(ProjectSeeder::class);
+        $this->call(InvoiceSeeder::class);
+        $this->call(InvoiceTaskSeeder::class);
         // \App\Models\User::factory(10)->create();
 
         // \App\Models\User::factory()->create([

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\SynchTrelloMessage;
 use App\Models\Board;
 use App\Models\BoardList;
 use App\Models\ListCard;
@@ -14,6 +15,7 @@ use Faker\Generator;
 use Illuminate\Console\Command;
 use Illuminate\Container\Container;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ConnectTrello extends Command
@@ -41,7 +43,8 @@ class ConnectTrello extends Command
      */
     public function handle()
     {
-        $createdBoards = $updatedBoards = $createdLists = $updatedLists = $createdCards = $updatedCards = 0;
+        $createdBoards = $updatedBoards = $createdLists = $updatedLists = $createdCards = $updatedCards = $cardsWithMultipleTags = 0;
+        $message = 'При синхронизации с Trello были выделены карточки с несколькими тегами: ';
         $api = new TrelloApi();
         //todo реализовать получение данных для всех букеров
         $boards = $api->getBoardsByMember($this->memberId);
@@ -80,13 +83,27 @@ class ConnectTrello extends Command
             foreach ($cards as $card) {
                 //creating or adding card
                 $existCard = ListCard::find($card['id']);
+                $tag = null;
+                $countTags = Str::substrCount($card['name'], ' #');
+                if ($countTags > 0) {
+                    $tags = Str::substr($card['name'], mb_strpos($card['name'], '#'));
+                    if ($countTags == 1) {
+                        $tag = $tags;
+                    } else {
+                        $tags = explode(' ', $tags);
+                        $tag = $tags[0];
+                        $message .= "<br/>$card[name]";
+                        $cardsWithMultipleTags++;
+                    }
+                }
                 $data = [
                     'idCard' => $card['id'],
                     'name' => $card['name'],
                     'pos' => $card['pos'],
                     'due' => $card['due'],
                     'idList' => $card['idList'],
-                    'urlSource' => $card['shortUrl'] //or $card['url']
+                    'urlSource' => $card['shortUrl'], //or $card['url']
+                    'invoice_task_tag' => $tag == '#tag' ? $tag : null
                 ];
                 if (!$existCard) {
                     ListCard::create($data);
@@ -161,6 +178,16 @@ class ConnectTrello extends Command
         $this->info("Lists has been updated: $updatedLists");
         $this->info("Cards has been created: $createdCards");
         $this->info("Cards has been updated: $updatedCards");
+
+        if($cardsWithMultipleTags > 0) {
+            $message .= '<br/>Сохранился только первый тег, остальные были проигнорированы.';
+            $users = User::all();
+            foreach ($users as $user) {
+                if ($user->isAdmin()) {
+                    Mail::to($user->email)->send(new SynchTrelloMessage($message));
+                }
+            }
+        }
         return Command::SUCCESS;
     }
 
@@ -175,5 +202,9 @@ class ConnectTrello extends Command
         unset($arr[0]);
         unset($arr[1]);
         return implode(' ', $arr);
+    }
+
+    public function sendMessage($recipient, $message) {
+        mail($recipient, 'Synchronize trello tags', $message);
     }
 }
