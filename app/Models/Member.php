@@ -13,6 +13,10 @@ class Member extends Model
     public $incrementing = false;
     protected $fillable = ['id', 'user_name', 'user_id', 'rate'];
 
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+
     public function listCards() {
         return $this->belongsToMany(ListCard::class, 'members_cards')->using(MemberCard::class)->withPivot('id', 'est_hour');
     }

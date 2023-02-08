@@ -48,18 +48,25 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'users_roles');
     }
 
-    public function isAdmin() {
+    public function isAdmin()
+    {
         $roles = $this->roles()->get();
         foreach ($roles as $role) {
-            if($role->role == 'Admin'){
+            if ($role->role == 'Admin') {
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
         }
+    }
 
-    public function booker() {
+    public function booker()
+    {
         return $this->hasOne(Booker::class);
+    }
+
+    public function member()
+    {
+        return $this->hasOne(Member::class);
     }
 }
