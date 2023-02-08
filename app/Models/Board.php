@@ -13,4 +13,8 @@ class Board extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = ['idBoard', 'name'];
+
+    public function boardLists() {
+        return $this->hasMany(BoardList::class);
+    }
 }

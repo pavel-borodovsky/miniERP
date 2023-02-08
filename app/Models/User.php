@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'isActive'
     ];
 
     /**
@@ -57,5 +58,8 @@ class User extends Authenticatable
                 return false;
             }
         }
+
+    public function booker() {
+        return $this->hasOne(Booker::class);
     }
 }

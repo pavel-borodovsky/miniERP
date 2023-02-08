@@ -12,5 +12,13 @@ class ListCard extends Model
     protected $primaryKey = 'idCard';
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $fillable = ['idCard', 'name', 'idList', 'pos', 'due', 'urlSource'];
+    protected $fillable = ['idCard', 'name', 'idList', 'pos', 'due', 'urlSource', 'invoice_task_tag'];
+
+    public function boardList() {
+        return $this->belongsTo(BoardList::class);
+    }
+
+    public function members() {
+        return $this->belongsToMany(Member::class, 'members_cards')->using(MemberCard::class)->withPivot('id', 'est_hour');
+    }
 }
