@@ -32,7 +32,7 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained();
             $table->string('desc');
             $table->unsignedDouble('fix_price')->nullable();
-            $table->string('tag')->nullable();
+            $table->string('tag')->nullable()->unique();
             $table->timestamps();
         });
 
