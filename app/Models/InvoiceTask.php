@@ -9,4 +9,8 @@ class InvoiceTask extends Model
 {
     use HasFactory;
     protected $fillable = ['invoice_id', 'desc', 'fix_price', 'tag'];
+
+    public function invoice() {
+        return $this->belongsTo(Invoice::class);
+    }
 }
