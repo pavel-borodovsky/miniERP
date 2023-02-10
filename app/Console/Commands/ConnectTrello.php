@@ -44,6 +44,7 @@ class ConnectTrello extends Command
      */
     public function handle()
     {
+        $faker = Container::getInstance()->make(Generator::class);
         // going through boards of existing bookers
         $bookers = Booker::all();
         foreach ($bookers as $booker) {
@@ -123,58 +124,61 @@ class ConnectTrello extends Command
                     }
 
                     //check members for card
-                    $tempMember = null;
                     $members = $api->getMembersOfCard($card['id']);
-                    foreach ($members as $member) {
-                        $tempMember = Member::find($member['id']);
-                        if (!$tempMember) {
+                    foreach ($members as $trello_member) {
+                        $member = Member::find($trello_member['id']);
+                        if (!$member) {
                             //adding user with faker's help
-                            $faker = Container::getInstance()->make(Generator::class);
                             $user = User::create([
-                                'name' => $member['username'],
+                                'name' => $trello_member['username'],
                                 'email' => $faker->unique()->safeEmail(),
                                 'password' => $faker->password(),
                                 'isActive' => 0
                             ]);
-
-                            $tempMember = Member::create([
-                                'id' => $member['id'],
-                                'user_name' => $member['username'],
+                            $member = Member::create([
+                                'id' => $trello_member['id'],
+                                'user_name' => $trello_member['username'],
                                 'user_id' => $user->id
                             ]);
                         }
                         // add member to card if needed
-                        if (!$tempMember->listCards->find($card['id'])) {
-                            $tempMember->listCards()->attach($card['id']);
-                            $tempMember = $tempMember->fresh();
+                        if (!$member->listCards->find($card['id'])) {
+                            $member->listCards()->attach($card['id']);
+                            $member = $member->fresh();
                         }
                     }
 
+                    // sync member first estimate and member spend time records from the card
                     $comments = $api->getCommentsByCard($card['id']);
-
-                    //no reason to check comments without members linked with card
-                    if ($tempMember != null) {
-                        foreach ($comments as $comment) {
-                            $tempMember->listCards->find($card['id']);
-                            $text = $comment['data']['text'];
-                            //adding estimate hour into pivot table
-                            if (Str::startsWith($text, 'plus! 0/')) {
-                                $time = $this->getTimeFromComment($comment['data']['text']);
-                                $estHour = $time[1];
-                                $tempMember->listCards()->updateExistingPivot($card['id'], ['est_hour' => $estHour]);
-                            }
-                            if (Str::startsWith($text, 'plus! ')) {
-                                $time = $this->getTimeFromComment($text);
-                                $note = $this->getNoteFromComment($text);
-                                $memberCardId = MemberCard::where(['list_card_idCard' => $card['id'], 'member_id' => $tempMember->id])->first()->id;
-                                if ($time[0] > 0 && MemberCardTime::where(['members_cards_id' => $memberCardId, 'date' => Carbon::parse($comment['date'])->format('Y-m-d H:i:s'), 'spent_time' => (double)$time[0]])->first() == null) {
-                                    MemberCardTime::create([
-                                        'spent_time' => (double)$time[0],
-                                        'date' => Carbon::parse($comment['date'])->format('Y-m-d H:i:s'),
-                                        'note' => $note ?? null,
-                                        'members_cards_id' => $tempMember->listCards->find($card['id']) ? $tempMember->listCards->find($card['id'])->pivot->id : ''
-                                    ]);
-                                }
+                    foreach ($comments as $comment) {
+                        $text = $comment['data']['text'];
+                        if (Str::startsWith($text, 'plus! ') === false) {
+                            // not comment with time - skip it
+                            continue;
+                        }
+                        $member = Member::find($comment['idMemberCreator']);
+                        // if user tracked time to the card but he was not its member - we'll create MemberCard record
+                        $memberCard = MemberCard::firstOrCreate(['list_card_idCard' => $card['id'], 'member_id' => $member->id]);
+                        $memberCardId = $memberCard->id;
+                        //adding estimate hour into pivot table
+                        if (Str::startsWith($text, 'plus! 0/')) {
+                            $time = $this->getTimeFromComment($comment['data']['text']);
+                            $estHour = $time[1];
+                            $member->listCards()->updateExistingPivot($card['id'], ['est_hour' => $estHour]);
+                            continue;
+                        }
+                        // adding new spent time records
+                        if (Str::startsWith($text, 'plus! ')) {
+                            $time = $this->getTimeFromComment($text);
+                            $note = $this->getNoteFromComment($text);
+                            $time_record_data = [
+                                'members_cards_id' => $memberCardId,
+                                'date' => Carbon::parse($comment['date'])->format('Y-m-d H:i:s'),
+                                'spent_time' => (double)$time[0],
+                            ];
+                            $time_record = MemberCardTime::where($time_record_data)->first();
+                            if ($time[0] > 0 && $time_record === null) {
+                                MemberCardTime::create( array_merge($time_record_data, ['note' => $note ?? null,]));
                             }
                         }
                     }
