@@ -33,6 +33,7 @@ class SynchTrelloMessage extends Mailable
     public function envelope()
     {
         return new Envelope(
+            from: env('MAIL_USERNAME'),
             subject: 'Synch Trello Message',
         );
     }
