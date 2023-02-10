@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\InvoiceTaskController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,5 +32,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::resource('projects', ProjectController::class)
+    ->missing(function (Request $request){
+        return Redirect::route('projects.index');
+});
+Route::resource('invoices', InvoiceController::class)
+    ->missing(function (Request $request){
+        return Redirect::route('invoices.index');
+    });
+Route::resource('invoice_tasks', InvoiceTaskController::class)
+    ->missing(function (Request $request){
+        return Redirect::route('invoice_tasks.index');
+    });
 
 require __DIR__.'/auth.php';
