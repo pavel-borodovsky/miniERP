@@ -26,7 +26,7 @@ class ConnectTrello extends Command
      *
      * @var string
      */
-    protected $signature = 'synch:trello';
+    protected $signature = 'sync:trello';
 
     /**
      * The console command description.
@@ -43,6 +43,7 @@ class ConnectTrello extends Command
      */
     public function handle()
     {
+        // going through boards of existing bookers
         $bookers = Booker::all();
         foreach ($bookers as $booker) {
             $api = new TrelloApi($booker->trello_token);
@@ -50,6 +51,7 @@ class ConnectTrello extends Command
             $createdBoards = $updatedBoards = $createdLists = $updatedLists = $createdCards = $updatedCards = $cardsWithMultipleTags = 0;
             $message = 'При синхронизации с Trello были выделены карточки с несколькими тегами: ';
             foreach ($boards as $board) {
+                // sync boards
                 $existBoard = Board::find($board['id']);
                 $data = [
                     'idBoard' => $board['id'],
@@ -62,7 +64,7 @@ class ConnectTrello extends Command
                     $existBoard->update($data);
                     $updatedBoards++;
                 }
-
+                // sync boards lists
                 $lists = $api->getListsByBoard($board['id']);
                 foreach ($lists as $list) {
                     $existList = BoardList::find($list['id']);
@@ -80,6 +82,7 @@ class ConnectTrello extends Command
                         $updatedLists++;
                     }
                 }
+                // sync lists cards
                 $cards = $api->getCardsByBoard($board['id']);
                 foreach ($cards as $card) {
                     //creating or adding card
@@ -91,6 +94,7 @@ class ConnectTrello extends Command
                         if ($countTags == 1) {
                             $tag = $tags;
                         } else {
+                            // there is more then 1 hashtag - send warning and sync only first
                             $tags = explode(' ', $tags);
                             $tag = $tags[0];
                             $message .= "<br/>$card[name]";
@@ -138,7 +142,7 @@ class ConnectTrello extends Command
                         //check existing that relation
                         if (!$tempMember->listCards->find($card['id'])) {
                             $tempMember->listCards()->attach($card['id']);
-                            //storing old value member without relation, need to rewrite
+                            //todo storing old value member without relation, need to rewrite
                             $tempMember = Member::find($member['id']);
                         }
                     }
