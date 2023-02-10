@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Board;
+use App\Models\BoardList;
 use App\Models\Invoice;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -28,7 +30,8 @@ class InvoiceController extends Controller
     public function create()
     {
         $projects = Project::all();
-        return view('invoices-create', ['projects' => $projects]);
+        $boards = Board::all();
+        return view('invoices-create', ['projects' => $projects, 'boards' => $boards]);
     }
 
     /**
@@ -40,9 +43,10 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'string|nullable',
             'date' => 'required|date',
-            'project_id' => 'required'
+            'project_id' => 'required',
+            'idBoard' => 'required',
+            'name' => 'string|nullable',
         ]);
 
         Invoice::create($request->post());
@@ -69,7 +73,8 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
         $projects = Project::all();
-        return view('invoices-edit', ['invoice' => $invoice, 'projects' => $projects]);
+        $boards = Board::all();
+        return view('invoices-edit', ['invoice' => $invoice, 'projects' => $projects, 'boards' => $boards]);
     }
 
     /**

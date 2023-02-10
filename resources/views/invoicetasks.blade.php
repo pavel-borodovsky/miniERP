@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Invoices</title>
+    <title>Invoice Tasks</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" >
 </head>
 <body>
@@ -10,10 +10,10 @@
     <div class="row">
         <div class="col-lg-12 margin-tb">
             <div class="pull-left">
-                <h2>Invoices</h2>
+                <h2>Invoice Tasks</h2>
             </div>
             <div class="pull-right mb-2">
-                <a class="btn btn-success" href="{{ route('invoices.create') }}"> Create Invoice</a>
+                <a class="btn btn-success" href="{{ route('invoice_tasks.create') }}"> Create Invoice Task</a>
             </div>
         </div>
     </div>
@@ -30,24 +30,24 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>Project</th>
-            <th>Date</th>
-            <th>Board</th>
-            <th>Invoice Name</th>
+            <th>Invoice</th>
+            <th>Tag</th>
+            <th>Description</th>
+            <th>Fix price</th>
             <th>Action</th>
         </tr>
         </thead>
         <tbody>
-        @foreach ($invoices as $invoice)
+        @foreach ($invoiceTasks as $task)
             <tr>
-                <td>{{ $invoice->id }}</td>
-                <td>{{ $invoice->project->name }}</td>
-                <td>{{ $invoice->date }}</td>
-                <td>{{ $invoice->board->name }}</td>
-                <td>{{ $invoice->name }}</td>
+                <td>{{ $task->id }}</td>
+                <td>{{ $task->invoice->date }}</td>
+                <td>{{ $task->tag }}</td>
+                <td>{{ $task->desc }}</td>
+                <td>{{ $task->fix_price }}</td>
                 <td>
-                    <form action="{{ route('invoices.destroy',$invoice->id) }}" method="Post">
-                        <a class="btn btn-primary" href="{{ route('invoices.edit',$invoice->id) }}">Edit</a>
+                    <form action="{{ route('invoice_tasks.destroy',$task->id) }}" method="Post">
+                        <a class="btn btn-primary" href="{{ route('invoice_tasks.edit',$task->id) }}">Edit</a>
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Delete</button>

@@ -13,4 +13,12 @@ class InvoiceTask extends Model
     public function invoice() {
         return $this->belongsTo(Invoice::class);
     }
+
+    public function incomeRates() {
+        return $this->hasMany(IncomeRate::class);
+    }
+
+    public function listCards() {
+        return $this->hasMany(ListCard::class, 'invoice_task_tag');
+    }
 }

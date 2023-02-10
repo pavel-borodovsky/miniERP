@@ -15,10 +15,14 @@ class ListCard extends Model
     protected $fillable = ['idCard', 'name', 'idList', 'pos', 'due', 'urlSource', 'invoice_task_tag'];
 
     public function boardList() {
-        return $this->belongsTo(BoardList::class);
+        return $this->belongsTo(BoardList::class, 'idList');
     }
 
     public function members() {
         return $this->belongsToMany(Member::class, 'members_cards')->using(MemberCard::class)->withPivot('id', 'est_hour');
+    }
+
+    public function invoiceTask() {
+        return $this->belongsTo(InvoiceTask::class, 'invoice_task_tag');
     }
 }

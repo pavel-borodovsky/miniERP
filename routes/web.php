@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\InvoiceTaskController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Http\Request;
@@ -38,7 +39,11 @@ Route::resource('projects', ProjectController::class)
 });
 Route::resource('invoices', InvoiceController::class)
     ->missing(function (Request $request){
-        return Redirect::route('projects.index');
+        return Redirect::route('invoices.index');
+    });
+Route::resource('invoice_tasks', InvoiceTaskController::class)
+    ->missing(function (Request $request){
+        return Redirect::route('invoice_tasks.index');
     });
 
 require __DIR__.'/auth.php';

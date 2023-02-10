@@ -31,16 +31,6 @@
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <strong>Invoice Name:</strong>
-                    <input type="text" name="name" value="{{ $invoice->name }}" class="form-control"
-                           placeholder="Invoice name">
-                    @error('name')
-                    <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="form-group">
                     <strong>Date:</strong>
                     <input type="date" name="date" value="{{ now()}}" class="form-control">
                     @error('date')
@@ -57,6 +47,20 @@
                                 <option selected value="{{$project->id}}">{{$project->name}}</option>
                             @else
                                 <option value="{{$project->id}}">{{$project->name}}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                <div class="form-group">
+                    <strong>Board:</strong>
+                    <select name="idBoard" class="form-control">
+                        @foreach($boards as $board)
+                            @if($board->idBoard == $invoice->idBoard)
+                                <option selected value="{{$board->idBoard}}">{{$board->name}}</option>
+                            @else
+                                <option value="{{$board->idBoard}}">{{$board->name}}</option>
                             @endif
                         @endforeach
                     </select>

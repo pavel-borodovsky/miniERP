@@ -8,13 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Invoice extends Model
 {
     use HasFactory;
-    protected $fillable = ['project_id', 'date', 'name'];
+    protected $fillable = ['project_id', 'date', 'name', 'idBoard'];
 
     public function project() {
         return $this->belongsTo(Project::class);
     }
 
-    public function invoice_tasks() {
+    public function invoiceTasks() {
         return $this->hasMany(InvoiceTask::class);
+    }
+
+    public function board() {
+        return $this->belongsTo(Board::class, 'idBoard');
     }
 }

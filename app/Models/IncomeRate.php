@@ -9,4 +9,8 @@ class IncomeRate extends Model
 {
     use HasFactory;
     protected $fillable = ['invoice_task_id', 'member_id', 'rate', 'hours'];
+
+    public function invoiceTask() {
+        return $this->belongsTo(InvoiceTask::class);
+    }
 }
