@@ -6,6 +6,7 @@ use App\Mail\SynchTrelloMessage;
 use App\Models\Board;
 use App\Models\BoardList;
 use App\Models\Booker;
+use App\Models\InvoiceTask;
 use App\Models\ListCard;
 use App\Models\Member;
 use App\Models\MemberCard;
@@ -46,7 +47,7 @@ class ConnectTrello extends Command
         $bookers = Booker::all();
         foreach ($bookers as $booker) {
             $api = new TrelloApi($booker->trello_token);
-            $boards = $api->getBoardsByMember($booker->user->member->id);
+            $boards = $api->getBoardsByMember($booker->user->name);
             $createdBoards = $updatedBoards = $createdLists = $updatedLists = $createdCards = $updatedCards = $cardsWithMultipleTags = 0;
             $message = 'При синхронизации с Trello были выделены карточки с несколькими тегами: ';
             foreach ($boards as $board) {
@@ -104,8 +105,11 @@ class ConnectTrello extends Command
                         'due' => $card['due'],
                         'idList' => $card['idList'],
                         'urlSource' => $card['shortUrl'], //or $card['url']
-                        'invoice_task_tag' => $tag == '#tag' ? $tag : null
                     ];
+
+                    if(InvoiceTask::where('tag', $tag)->first()) {
+                        $data['invoice_task_tag'] = $tag;
+                    }
                     if (!$existCard) {
                         ListCard::create($data);
                         $createdCards++;
@@ -174,14 +178,14 @@ class ConnectTrello extends Command
                 }
             }
         }
-        $this->info("Boards has been created: $createdBoards");
+        /*$this->info("Boards has been created: $createdBoards");
         $this->info("Boards has been updated: $updatedBoards");
         $this->info("Lists has been created: $createdLists");
         $this->info("Lists has been updated: $updatedLists");
         $this->info("Cards has been created: $createdCards");
-        $this->info("Cards has been updated: $updatedCards");
+        $this->info("Cards has been updated: $updatedCards");*/
 
-        if($cardsWithMultipleTags > 0) {
+        /*if($cardsWithMultipleTags > 0) {
             $message .= '<br/>Сохранился только первый тег, остальные были проигнорированы.';
             $users = User::all();
             foreach ($users as $user) {
@@ -189,7 +193,7 @@ class ConnectTrello extends Command
                     Mail::to($user->email)->send(new SynchTrelloMessage($message));
                 }
             }
-        }
+        }*/
         return Command::SUCCESS;
     }
 
