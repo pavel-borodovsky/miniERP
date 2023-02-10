@@ -43,8 +43,6 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
-            //'auth_mode'  => null,
-            'verify_peer' => false,
         ],
 
         'ses' => [
@@ -97,8 +95,8 @@ return [
     */
 
     'from' => [
-        'address' => 'info@minierp.com',
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'info@minierp.com'),
+        'name' => env('MAIL_FROM_NAME', 'miniERP'),
     ],
 
     /*
