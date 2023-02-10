@@ -95,7 +95,7 @@ class ConnectTrello extends Command
                         if ($countTags == 1) {
                             $tag = $tags;
                         } else {
-                            // there is more then 1 hashtag - send warning and sync only first
+                            // there is more than 1 hashtag - send warning and sync only first
                             $tags = explode(' ', $tags);
                             $tag = $tags[0];
                             $message .= "<br/>$card[name]";
@@ -189,7 +189,7 @@ class ConnectTrello extends Command
         $this->info("Cards has been created: $createdCards");
         $this->info("Cards has been updated: $updatedCards");*/
 
-        /*if($cardsWithMultipleTags > 0) {
+        if($cardsWithMultipleTags > 0) {
             $message .= '<br/>Сохранился только первый тег, остальные были проигнорированы.';
             $users = User::all();
             foreach ($users as $user) {
@@ -197,7 +197,7 @@ class ConnectTrello extends Command
                     Mail::to($user->email)->send(new SynchTrelloMessage($message));
                 }
             }
-        }*/
+        }
         return Command::SUCCESS;
     }
 

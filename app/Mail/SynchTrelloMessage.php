@@ -13,16 +13,16 @@ class SynchTrelloMessage extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $message;
+    public $note;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($message)
+    public function __construct($note)
     {
-        $this->message = $message;
+        $this->note = $note;
     }
 
     /**
