@@ -143,11 +143,10 @@ class ConnectTrello extends Command
                                 'user_id' => $user->id
                             ]);
                         }
-                        //check existing that relation
+                        // add member to card if needed
                         if (!$tempMember->listCards->find($card['id'])) {
                             $tempMember->listCards()->attach($card['id']);
-                            //todo storing old value member without relation, need to rewrite
-                            $tempMember = Member::find($member['id']);
+                            $tempMember = $tempMember->fresh();
                         }
                     }
 
