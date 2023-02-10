@@ -15,6 +15,10 @@ class Board extends Model
     protected $fillable = ['idBoard', 'name'];
 
     public function boardLists() {
-        return $this->hasMany(BoardList::class);
+        return $this->hasMany(BoardList::class, 'idBoard');
+    }
+
+    public function invoices() {
+        return $this->hasMany(Invoice::class, 'idBoard');
     }
 }
