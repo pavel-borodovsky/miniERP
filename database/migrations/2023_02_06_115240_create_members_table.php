@@ -28,6 +28,7 @@ return new class extends Migration
             $table->foreign('list_card_idCard')->references('idCard')->on('list_cards');
             $table->string('member_id');
             $table->foreign('member_id')->references('id')->on('members');
+            $table->unique(['list_card_idCard', 'member_id']);
             $table->unsignedDouble('est_hour')->nullable();
         });
 

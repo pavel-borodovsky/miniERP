@@ -18,6 +18,7 @@ class Member extends Model
     }
 
     public function listCards() {
-        return $this->belongsToMany(ListCard::class, 'members_cards')->using(MemberCard::class)->withPivot('id', 'est_hour');
+        return $this->belongsToMany(ListCard::class, 'members_cards', 'member_id', 'list_card_idCard')
+            ->using(MemberCard::class)->withPivot('id', 'est_hour');
     }
 }

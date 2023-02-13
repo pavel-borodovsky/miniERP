@@ -10,6 +10,7 @@ class MemberCard extends Pivot
     public $incrementing = true;
 
     protected $fillable = ['est_hour'];
+    public $timestamps = false;
 
     public function memberCardTime() {
         return $this->hasMany(MemberCardTime::class);
