@@ -21,4 +21,8 @@ class Invoice extends Model
     public function board() {
         return $this->belongsTo(Board::class, 'idBoard');
     }
+
+    public function status() {
+        return $this->belongsTo(Status::class);
+    }
 }

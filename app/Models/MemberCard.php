@@ -13,6 +13,6 @@ class MemberCard extends Pivot
     public $timestamps = false;
 
     public function memberCardTime() {
-        return $this->hasMany(MemberCardTime::class);
+        return $this->hasMany(MemberCardTime::class, 'members_cards_id');
     }
 }

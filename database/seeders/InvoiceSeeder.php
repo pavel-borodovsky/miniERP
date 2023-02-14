@@ -22,7 +22,8 @@ class InvoiceSeeder extends Seeder
                 'project_id' => 1,
                 'date' => now(),
                 'name' => 'Test invoice for test project and test board',
-                'idBoard' => $board->idBoard
+                'idBoard' => $board->idBoard,
+                'status_id' => 2
             ]);
         }
     }

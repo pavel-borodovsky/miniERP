@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('main');
 });
 
 Route::get('/dashboard', function () {
@@ -45,5 +45,7 @@ Route::resource('invoice_tasks', InvoiceTaskController::class)
     ->missing(function (Request $request){
         return Redirect::route('invoice_tasks.index');
     });
+
+Route::get('/result', \App\Http\Controllers\ResultController::class)->middleware(['admin', 'verified']);
 
 require __DIR__.'/auth.php';
