@@ -35,7 +35,6 @@ class ConnectTrello extends Command
      * @var string
      */
     protected $description = 'Getting data via API Trello and updating model\'s data';
-    //используется в кач-ве букера
 
     /**
      * Execute the console command.
@@ -47,6 +46,7 @@ class ConnectTrello extends Command
         $faker = Container::getInstance()->make(Generator::class);
         // going through boards of existing bookers
         $bookers = Booker::all();
+        $missedInfo = [];
         foreach ($bookers as $booker) {
             $api = new TrelloApi($booker->trello_token);
             $boards = $api->getBoardsByMember($booker->user->name);
@@ -99,7 +99,12 @@ class ConnectTrello extends Command
                             // there is more than 1 hashtag - send warning and sync only first
                             $tags = explode(' ', $tags);
                             $tag = $tags[0];
-                            $message .= "<br/>$card[name]";
+                            unset($tags[0]);
+                            $missedInfo[] = [
+                                'card' => $card['name'],
+                                'saved_tag' => $tag,
+                                'missed_tags' => $tags
+                            ];
                             $cardsWithMultipleTags++;
                         }
                     }
@@ -191,9 +196,17 @@ class ConnectTrello extends Command
         $this->info("Lists has been updated: $updatedLists");
         $this->info("Cards has been created: $createdCards");
         $this->info("Cards has been updated: $updatedCards");*/
-
         if($cardsWithMultipleTags > 0) {
-            $message .= '<br/>Сохранился только первый тег, остальные были проигнорированы.';
+            foreach ($missedInfo as $item) {
+                $message .= "<br/>$item[card] - был сохранен только первый тег: $item[saved_tag], остальные были проигнорированы: ";
+                foreach ($item['missed_tags'] as $tag) {
+                    if(last($item['missed_tags']) !== $tag) {
+                        $message .= "$tag, ";
+                    } else {
+                        $message .= "$tag";
+                    }
+                }
+            }
             $users = User::all();
             foreach ($users as $user) {
                 if ($user->isAdmin()) {
