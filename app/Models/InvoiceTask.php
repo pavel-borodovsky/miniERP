@@ -19,6 +19,6 @@ class InvoiceTask extends Model
     }
 
     public function listCards() {
-        return $this->hasMany(ListCard::class, 'invoice_task_tag');
+        return $this->hasMany(ListCard::class, 'invoice_task_tag', 'tag');
     }
 }
