@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\InvoiceTaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +17,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::apiResources([
+        'projects' => ProjectController::class,
+        'invoices' => InvoiceController::class,
+        'invoice_tasks' => InvoiceTaskController::class
+    ]);
+});
+
