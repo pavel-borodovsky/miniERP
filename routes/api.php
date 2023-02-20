@@ -21,6 +21,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::post('/login', 'App\Http\Controllers\Api\LoginController@login');
+
 Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResources([
         'projects' => ProjectController::class,
