@@ -46,6 +46,6 @@ Route::resource('invoice_tasks', InvoiceTaskController::class)
         return Redirect::route('invoice_tasks.index');
     });
 
-Route::get('/result', \App\Http\Controllers\ResultController::class)->middleware(['admin', 'verified']);
+Route::get('/', \App\Http\Controllers\SummaryController::class)->middleware(['admin', 'verified']);
 
 require __DIR__.'/auth.php';

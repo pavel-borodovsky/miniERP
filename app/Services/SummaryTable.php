@@ -1,24 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services;
 
-use App\Models\Member;
 use App\Models\MemberCard;
 use App\Models\Project;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
 
-class ResultController extends Controller
+class SummaryTable
 {
-    public function __invoke(Request $request): RedirectResponse|View {
+    public function getInvoices() {
         $result = [];
         $projects = Project::all();
         foreach ($projects as $project) {
             $invoices = $project->invoices;
             foreach ($invoices as $invoice) {
                 $budget = 0;
-                $est = $spent = 0;
                 $resultMembers = [];
                 $tasks = $invoice->invoiceTasks;
                 foreach ($tasks as $task) {
@@ -46,22 +41,18 @@ class ResultController extends Controller
                         $resultMembers[$name]['total'] = $member['rate'] * $member['spent'];
                         $expenses += $resultMembers[$name]['total'];
                     }
-
-                    $result['invoices'][] = [
-                        'project' => $project->name,
-                        'invoice' => $invoice->date,
-                        'status' => $invoice->status->name,
-                        'budget' => $budget,
-                        'members' => $resultMembers,
-                        'expenses' => $expenses,
-                        'profit' => $budget - $expenses
-                    ];
-
                 }
+                $result['invoices'][] = [
+                    'project' => $project->name,
+                    'invoice' => $invoice->date,
+                    'status' => $invoice->status->name,
+                    'budget' => $budget,
+                    'members' => $resultMembers,
+                    'expenses' => $expenses,
+                    'profit' => $budget - $expenses
+                ];
             }
         }
-        $result['member_count'] = Member::count();
-
-        return view('result', ['result' => $result]);
+        return $result;
     }
 }

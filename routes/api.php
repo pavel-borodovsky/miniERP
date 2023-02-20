@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\API\InvoiceController;
+use App\Http\Controllers\API\ProjectController;
+use App\Http\Controllers\API\InvoiceTaskController;
+use App\Http\Controllers\API\SummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +18,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::post('/login', 'App\Http\Controllers\API\LoginController@login');
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::apiResources([
+        'projects' => ProjectController::class,
+        'invoices' => InvoiceController::class,
+        'invoice_tasks' => InvoiceTaskController::class
+    ]);
+    Route::get('/summary', SummaryController::class);
 });
