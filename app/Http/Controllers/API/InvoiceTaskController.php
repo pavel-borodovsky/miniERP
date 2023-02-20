@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Invoice;
+use App\Models\InvoiceTask;
 use Illuminate\Http\Request;
 
-class InvoiceController extends Controller
+class InvoiceTaskController extends Controller
 {
     public function index()
     {
-        $data = Invoice::all();
+        $data = InvoiceTask::all();
         return $data->toJson();
     }
 
     public function show($id)
     {
-        $data = Invoice::where('id', $id)->first();
+        $data = InvoiceTask::where('id', $id)->first();
         if ($data !== null) {
             return $data->toJson();
         } else {
@@ -26,7 +26,7 @@ class InvoiceController extends Controller
 
     public function destroy($id)
     {
-        if (Invoice::where('id', $id)->first()->delete()) {
+        if (InvoiceTask::where('id', $id)->first()->delete()) {
             return 1;
         } else {
             return response('Запись не найдена', 404);
@@ -35,7 +35,7 @@ class InvoiceController extends Controller
 
     public function store(Request $request)
     {
-        if (Invoice::create($request->post())) {
+        if (InvoiceTask::create($request->post())) {
             return response('Запись добавлена', 201);
         } else {
             return response('Запись не найдена', 404);
@@ -44,7 +44,7 @@ class InvoiceController extends Controller
 
     public function update(Request $request, $id)
     {
-        $oldData = Invoice::where('id', $id)->first();
+        $oldData = InvoiceTask::where('id', $id)->first();
         if ($oldData !== null) {
             $oldData->update($request->all());
             return response('Запись обновлена', 202);

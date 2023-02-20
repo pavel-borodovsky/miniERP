@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\Api\ProjectController;
-use App\Http\Controllers\Api\InvoiceTaskController;
+use App\Http\Controllers\API\InvoiceController;
+use App\Http\Controllers\API\ProjectController;
+use App\Http\Controllers\API\InvoiceTaskController;
+use App\Http\Controllers\API\SummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +22,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/login', 'App\Http\Controllers\Api\LoginController@login');
+Route::post('/login', 'App\Http\Controllers\API\LoginController@login');
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResources([
@@ -29,5 +30,5 @@ Route::group(['middleware' => 'auth:api'], function () {
         'invoices' => InvoiceController::class,
         'invoice_tasks' => InvoiceTaskController::class
     ]);
+    Route::get('/summary', SummaryController::class);
 });
-
